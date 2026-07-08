@@ -1,0 +1,5 @@
+ALTER TYPE "BookingStatus" ADD VALUE IF NOT EXISTS 'COMPLETED';
+
+ALTER TABLE "Booking"
+ADD COLUMN "completedAt" TIMESTAMP(3),
+ADD COLUMN "completionNote" TEXT;

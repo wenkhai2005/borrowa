@@ -1,0 +1,27 @@
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+const isProduction = process.env.NODE_ENV === "production";
+const fallbackJwtSecret = "dev-only-change-this-secret";
+
+if (isProduction && !process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is required when NODE_ENV=production.");
+}
+
+const env = {
+  nodeEnv: process.env.NODE_ENV || "development",
+  port: process.env.PORT || 4000,
+  databaseUrl: process.env.DATABASE_URL,
+  frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+  jwtSecret: process.env.JWT_SECRET || fallbackJwtSecret,
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+    from: process.env.SMTP_FROM || process.env.SMTP_USER
+  }
+};
+
+module.exports = env;
