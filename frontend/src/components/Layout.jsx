@@ -2,25 +2,6 @@ import { useEffect, useState } from "react";
 import { navigate } from "../router";
 import { getCurrentUser, isLoggedIn, logout } from "../utils/auth";
 
-function CameraIcon() {
-  return (
-    <svg aria-hidden="true" className="brand-icon" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M7.5 7 9 4.8h6L16.5 7H19a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2.5Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M12 16a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
 function isActive(currentPath, targetPath) {
   if (targetPath === "/") {
     return currentPath === "/";
@@ -39,6 +20,18 @@ function NavLink({ currentPath, path, children }) {
       {children}
     </button>
   );
+}
+
+function scrollToHowItWorks() {
+  if (window.location.hash !== "#/") {
+    navigate("/");
+    window.setTimeout(() => {
+      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+    }, 80);
+    return;
+  }
+
+  document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
 }
 
 function getStoredAccount() {
@@ -81,44 +74,36 @@ export default function Layout({ currentPath, children }) {
     navigate("/login");
   }
 
+  function handleBecomeHost() {
+    if (loggedIn && account?.role === "SELLER") {
+      navigate("/listings/new");
+      return;
+    }
+
+    if (loggedIn) {
+      navigate("/account");
+      return;
+    }
+
+    navigate("/register");
+  }
+
   return (
     <div className="app-shell">
       <header className="site-header">
         <button className="brand" onClick={() => navigate("/")} type="button">
-          <CameraIcon />
-          <span>Camera Rental</span>
+          <img alt="" className="brand-icon" src="/borrowa-logo.svg" />
+          <span>Borrowa</span>
         </button>
         <nav className="site-nav" aria-label="Primary navigation">
-          <NavLink currentPath={currentPath} path="/">
-            Listings
+          <NavLink currentPath={currentPath} path="/explore">
+            Explore
           </NavLink>
-          {loggedIn && account?.role === "SELLER" ? (
-            <NavLink currentPath={currentPath} path="/my-listings">
-              Dashboard
-            </NavLink>
-          ) : null}
-          {loggedIn && account?.role === "RENTER" ? (
-            <>
-              <NavLink currentPath={currentPath} path="/bookings">
-                My Bookings
-              </NavLink>
-              <NavLink currentPath={currentPath} path="/my-damage-reports">
-                Damage Reports
-              </NavLink>
-            </>
-          ) : null}
-          {!loggedIn ? (
-            <>
-              <NavLink currentPath={currentPath} path="/login">
-                Login
-              </NavLink>
-              <NavLink currentPath={currentPath} path="/register">
-                Register
-              </NavLink>
-            </>
-          ) : null}
-          <button aria-label="Notifications" className="icon-button" type="button">
-            <span aria-hidden="true">♢</span>
+          <button className="nav-link" onClick={scrollToHowItWorks} type="button">
+            How it works
+          </button>
+          <button className="nav-link" onClick={handleBecomeHost} type="button">
+            {loggedIn && account?.role === "SELLER" ? "Add listing" : "Become a host"}
           </button>
           <div className="profile-menu">
             <button

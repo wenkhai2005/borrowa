@@ -6,179 +6,6 @@ import { EmptyState, ErrorMessage, LoadingState } from "../components/Status";
 
 const categories = ["Camera", "Lense", "Action Camera", "Accessories", "Others"];
 
-const sampleListings = [
-  {
-    id: "sample-sony-a7-iv",
-    title: "Sony A7 IV",
-    cameraBrand: "Sony",
-    cameraModel: "A7 IV",
-    category: "Camera",
-    deposit: 1000,
-    location: "Petaling Jaya",
-    dailyRate: 120,
-    imageUrl: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80",
-    rating: "4.9",
-    reviews: 18,
-    ownerName: "Jason Tan",
-    ownerInitials: "JT",
-    deliveryAvailable: true,
-    verified: true
-  },
-  {
-    id: "sample-canon-r6",
-    title: "Canon EOS R6 Mark II",
-    cameraBrand: "Canon",
-    cameraModel: "R6 Mark II",
-    category: "Camera",
-    deposit: 1000,
-    location: "Kuala Lumpur",
-    dailyRate: 110,
-    imageUrl: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=900&q=80",
-    rating: "4.8",
-    reviews: 16,
-    ownerName: "Sarah Lim",
-    ownerInitials: "SL",
-    deliveryAvailable: true,
-    verified: true
-  },
-  {
-    id: "sample-sony-lens",
-    title: "Sony FE 24-70mm f/2.8 GM II",
-    cameraBrand: "Sony",
-    cameraModel: "24-70 GM II",
-    category: "Lens",
-    deposit: 800,
-    location: "Shah Alam",
-    dailyRate: 80,
-    imageUrl: "https://images.unsplash.com/photo-1510127034890-ba27508e9f1c?auto=format&fit=crop&w=900&q=80",
-    rating: "5.0",
-    reviews: 21,
-    ownerName: "Ahmad Rahman",
-    ownerInitials: "AR",
-    deliveryAvailable: false,
-    verified: true
-  },
-  {
-    id: "sample-canon-rf-70-200",
-    title: "Canon RF 70-200mm f/2.8",
-    cameraBrand: "Canon",
-    cameraModel: "RF 70-200",
-    category: "Lens",
-    deposit: 900,
-    location: "Subang Jaya",
-    dailyRate: 95,
-    imageUrl: "https://images.unsplash.com/photo-1512790182412-b19e6d62bc39?auto=format&fit=crop&w=900&q=80",
-    rating: "4.9",
-    reviews: 14,
-    ownerName: "Daniel Lee",
-    ownerInitials: "DL",
-    deliveryAvailable: true,
-    verified: true
-  },
-  {
-    id: "sample-dji-air-3",
-    title: "DJI Air 3",
-    cameraBrand: "DJI",
-    cameraModel: "Air 3",
-    category: "Drone",
-    deposit: 1500,
-    location: "Puchong",
-    dailyRate: 180,
-    imageUrl: "https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=900&q=80",
-    rating: "4.9",
-    reviews: 19,
-    ownerName: "Kevin Wong",
-    ownerInitials: "KW",
-    deliveryAvailable: false,
-    verified: true
-  },
-  {
-    id: "sample-dji-action-4",
-    title: "DJI Action 4",
-    cameraBrand: "DJI",
-    cameraModel: "Action 4",
-    category: "Action Camera",
-    deposit: 400,
-    location: "Kuala Lumpur",
-    dailyRate: 45,
-    imageUrl: "https://images.unsplash.com/photo-1495707902641-75cac588d2e9?auto=format&fit=crop&w=900&q=80",
-    rating: "4.8",
-    reviews: 11,
-    ownerName: "Melissa Ng",
-    ownerInitials: "MN",
-    deliveryAvailable: true,
-    verified: true
-  },
-  {
-    id: "sample-gopro-hero-13",
-    title: "GoPro Hero 13 Black",
-    cameraBrand: "GoPro",
-    cameraModel: "Hero 13",
-    category: "Action Camera",
-    deposit: 450,
-    location: "Cheras",
-    dailyRate: 50,
-    imageUrl: "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=900&q=80",
-    rating: "4.8",
-    reviews: 13,
-    ownerName: "Marcus Tan",
-    ownerInitials: "MT",
-    deliveryAvailable: true,
-    verified: true
-  },
-  {
-    id: "sample-godox",
-    title: "Godox SL60W",
-    cameraBrand: "Godox",
-    cameraModel: "SL60W",
-    category: "Lighting",
-    deposit: 250,
-    location: "Cyberjaya",
-    dailyRate: 30,
-    imageUrl: "https://images.unsplash.com/photo-1520390138845-fd2d229dd553?auto=format&fit=crop&w=900&q=80",
-    rating: "4.7",
-    reviews: 9,
-    ownerName: "Jason Ho",
-    ownerInitials: "JH",
-    deliveryAvailable: false,
-    verified: true
-  },
-  {
-    id: "sample-rode",
-    title: "Rode Wireless GO II",
-    cameraBrand: "Rode",
-    cameraModel: "Wireless GO II",
-    category: "Audio",
-    deposit: 300,
-    location: "Petaling Jaya",
-    dailyRate: 35,
-    imageUrl: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80",
-    rating: "5.0",
-    reviews: 17,
-    ownerName: "Siti Aminah",
-    ownerInitials: "SA",
-    deliveryAvailable: true,
-    verified: true
-  },
-  {
-    id: "sample-sigma-18-50",
-    title: "Sigma 18-50mm f/2.8 DC DN",
-    cameraBrand: "Sigma",
-    cameraModel: "18-50mm",
-    category: "Lens",
-    deposit: 350,
-    location: "Klang",
-    dailyRate: 40,
-    imageUrl: "https://images.unsplash.com/photo-1519183071298-a2962eadc3bb?auto=format&fit=crop&w=900&q=80",
-    rating: "4.8",
-    reviews: 12,
-    ownerName: "Nicholas Yap",
-    ownerInitials: "NY",
-    deliveryAvailable: false,
-    verified: true
-  }
-];
-
 const defaultFilters = {
   categories: [],
   brand: "",
@@ -238,21 +65,29 @@ function displayPrice(value) {
   return formatMoney(value).replace(".00", "");
 }
 
-function normalizeListing(listing, index) {
-  const fallback = sampleListings[index % sampleListings.length];
+function getInitials(name = "") {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "BR";
+}
+
+function normalizeListing(listing) {
   const hasSellerRating = listing.sellerAverageRating !== null && listing.sellerAverageRating !== undefined;
+  const imageUrls = Array.isArray(listing.imageUrls) ? listing.imageUrls : [];
 
   return {
-    ...fallback,
     ...listing,
     category: listing.category || inferCategory(listing),
-    imageUrl: listing.imageUrl || fallback.imageUrl,
+    imageUrl: imageUrls[0] || listing.imageUrl || "",
     rating: hasSellerRating ? Number(listing.sellerAverageRating).toFixed(1) : null,
     reviews: hasSellerRating ? listing.sellerReviewCount || 0 : 0,
-    ownerName: listing.ownerName || fallback.ownerName,
-    ownerInitials: listing.ownerInitials || fallback.ownerInitials,
-    deposit: listing.deposit || fallback.deposit,
-    deliveryAvailable: listing.deliveryAvailable ?? fallback.deliveryAvailable,
+    ownerName: listing.ownerName || "Borrowa host",
+    ownerInitials: listing.ownerInitials || getInitials(listing.ownerName),
+    deposit: listing.deposit || 0,
+    deliveryAvailable: listing.deliveryAvailable ?? false,
     verified: listing.verified ?? true
   };
 }
@@ -294,8 +129,7 @@ export default function ListingsPage() {
     return <LoadingState message="Loading camera listings..." />;
   }
 
-  const usingSampleListings = error || listings.length === 0;
-  const allListings = usingSampleListings ? sampleListings : listings.map(normalizeListing);
+  const allListings = error ? [] : listings.map(normalizeListing);
   const brands = [...new Set(allListings.map((listing) => listing.cameraBrand))].sort();
   const locations = [...new Set(allListings.map((listing) => listing.location))].sort();
   const categoryCounts = categories.reduce((counts, category) => {
@@ -374,14 +208,12 @@ export default function ListingsPage() {
   return (
     <section className="marketplace-page">
       {error ? (
-        <div className="demo-notice">
-          Backend listings could not be loaded, so sample marketplace cards are shown for preview.
-        </div>
+        <ErrorMessage error={error} />
       ) : null}
 
       {!error && listings.length === 0 ? (
         <div className="demo-notice">
-          No backend listings yet. Sample listings are shown so the marketplace UI can be previewed.
+          No listings yet. Real listings from the database will appear here once hosts add items.
         </div>
       ) : null}
 
@@ -539,7 +371,7 @@ export default function ListingsPage() {
                   </button>
                   <button className="listing-card-link" onClick={() => navigate(`/listings/${listing.id}`)} type="button">
                     <div className="listing-image">
-                      <img alt={listing.title} src={listing.imageUrl} />
+                      {listing.imageUrl ? <img alt={listing.title} src={listing.imageUrl} /> : <span>{listing.cameraBrand || "Item"}</span>}
                     </div>
                     <div className="listing-card-body">
                       <div>

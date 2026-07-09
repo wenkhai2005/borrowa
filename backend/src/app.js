@@ -8,6 +8,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const damageReportRoutes = require("./routes/damageReportRoutes");
 const listingRoutes = require("./routes/listingRoutes");
 const sellerBookingRoutes = require("./routes/sellerBookingRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const notFound = require("./middleware/notFound");
@@ -28,6 +29,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/damage-reports", damageReportRoutes);
 app.use("/api/seller", sellerBookingRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/uploads", uploadRoutes);
 app.use("/api/users", userRoutes);
 
 app.use(notFound);

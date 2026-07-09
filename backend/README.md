@@ -1,6 +1,6 @@
-# Camera Rental Backend
+# Borrowa Backend
 
-Express, PostgreSQL, and Prisma backend for the MVP camera rental platform.
+Express, PostgreSQL, and Prisma backend for the Borrowa MVP rental marketplace.
 
 ## Features
 
@@ -34,6 +34,30 @@ cp .env.example .env
 For production, set `NODE_ENV=production` and provide a strong `JWT_SECRET`. The API will fail fast on startup if `JWT_SECRET` is missing in production.
 
 Email verification links are generated from `FRONTEND_URL`; set it to the deployed frontend URL outside local development.
+
+Listing image uploads use Cloudinary. Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, and optionally `CLOUDINARY_FOLDER` in `.env`.
+
+Production deployments to Cloud Run should provide:
+
+```env
+NODE_ENV=production
+PORT=8080
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
+JWT_SECRET="use-a-long-random-production-secret"
+FRONTEND_URL="https://borrowa.com"
+SMTP_HOST="smtp.example.com"
+SMTP_PORT="587"
+SMTP_SECURE="false"
+SMTP_USER="smtp-user"
+SMTP_PASS="smtp-password"
+EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
+CLOUDINARY_CLOUD_NAME="cloud-name"
+CLOUDINARY_API_KEY="api-key"
+CLOUDINARY_API_SECRET="api-secret"
+CLOUDINARY_FOLDER="borrowa/listings"
+```
+
+Build the Cloud Run image from `backend/Dockerfile`. Run Cloud SQL migrations with `npx prisma migrate deploy` before routing traffic to a new revision.
 
 4. Create database tables:
 
@@ -74,10 +98,12 @@ Example listing payload:
   "cameraModel": "A7 III",
   "location": "Kuala Lumpur",
   "dailyRate": 120,
-  "imageUrl": "https://example.com/camera.jpg",
+  "imageUrls": ["https://res.cloudinary.com/example/image/upload/listing.jpg"],
   "isAvailable": true
 }
 ```
+
+Upload listing images first with `POST /api/uploads/listing-images` using multipart field `images` with up to 5 jpg, jpeg, png, or webp files.
 
 ### Bookings
 

@@ -131,7 +131,7 @@ export default function ListingDetailPage({ listingId }) {
     return (
       <section>
         <ErrorMessage error={error} />
-        <button className="secondary-button" onClick={() => navigate("/")} type="button">
+        <button className="secondary-button" onClick={() => navigate("/explore")} type="button">
           Back to Listings
         </button>
       </section>
@@ -143,6 +143,11 @@ export default function ListingDetailPage({ listingId }) {
   const activeBookings = availability.activeBookings || [];
   const unavailableDates = availability.unavailableDates || [];
   const visibleActiveBookings = activeBookings;
+  const listingImages = Array.isArray(listing.imageUrls)
+    ? listing.imageUrls
+    : listing.imageUrl
+      ? [listing.imageUrl]
+      : [];
   const bookingDisabled =
     submitting ||
     !listing.isAvailable ||
@@ -150,19 +155,26 @@ export default function ListingDetailPage({ listingId }) {
 
   return (
     <section>
-      <button className="text-button" onClick={() => navigate("/")} type="button">
+      <button className="text-button" onClick={() => navigate("/explore")} type="button">
         Back to listings
       </button>
 
       <div className="detail-layout">
         <article className="detail-main">
           <div className="detail-image">
-            {listing.imageUrl ? (
-              <img alt={listing.title} src={listing.imageUrl} />
+            {listingImages.length > 0 ? (
+              <img alt={listing.title} src={listingImages[0]} />
             ) : (
               <span>{listing.cameraBrand}</span>
             )}
           </div>
+          {listingImages.length > 1 ? (
+            <div className="detail-image-strip">
+              {listingImages.slice(1).map((imageUrl, index) => (
+                <img alt={`${listing.title} ${index + 2}`} key={imageUrl} src={imageUrl} />
+              ))}
+            </div>
+          ) : null}
           <div className="detail-content">
             <div className="listing-title-row">
               <div>

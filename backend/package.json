@@ -1,7 +1,7 @@
 {
-  "name": "camera-rental-backend",
+  "name": "borrowa-backend",
   "version": "1.0.0",
-  "description": "Express and Prisma API for an MVP camera rental platform.",
+  "description": "Express and Prisma API for the Borrowa MVP rental marketplace.",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
@@ -14,7 +14,7 @@
     "prisma:studio": "prisma studio"
   },
   "keywords": [
-    "camera-rental",
+    "borrowa",
     "express",
     "prisma",
     "postgresql"
@@ -24,12 +24,14 @@
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.10.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
+    "multer": "^2.2.0",
     "nodemailer": "^9.0.1"
   },
   "devDependencies": {

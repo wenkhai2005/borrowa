@@ -342,7 +342,13 @@ export default function MyListingsPage() {
         {listings.map((listing) => (
           <article className="manage-card" key={listing.id}>
             <div className="manage-image">
-              {listing.imageUrl ? <img alt={listing.title} src={listing.imageUrl} /> : <span>{listing.cameraBrand}</span>}
+              {Array.isArray(listing.imageUrls) && listing.imageUrls[0] ? (
+                <img alt={listing.title} src={listing.imageUrls[0]} />
+              ) : listing.imageUrl ? (
+                <img alt={listing.title} src={listing.imageUrl} />
+              ) : (
+                <span>{listing.cameraBrand}</span>
+              )}
             </div>
 
             {editingId === listing.id ? (

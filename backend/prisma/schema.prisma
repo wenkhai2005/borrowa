@@ -74,6 +74,7 @@ model Listing {
   serialNumber     String                   @default("")
   includedItems    String                   @default("")
   imageUrl         String?
+  imageUrls        Json?
   isAvailable      Boolean                  @default(true)
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
@@ -191,7 +192,7 @@ model User {
   id                         String    @id @default(cuid())
   name                       String
   email                      String    @unique
-  passwordHash               String
+  passwordHash               String?
   role                       UserRole  @default(RENTER)
   phone                      String?
   emailVerifiedAt            DateTime?
@@ -199,4 +200,14 @@ model User {
   emailVerificationExpiresAt DateTime?
   createdAt                  DateTime  @default(now())
   updatedAt                  DateTime  @updatedAt
+}
+
+model PendingRegistration {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  emailVerificationHash String?   @unique
+  emailVerificationExpiresAt DateTime?
+  emailVerifiedAt       DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }

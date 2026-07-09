@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getMe, resendVerificationEmail } from "../api";
+import { becomeSeller, getMe, resendVerificationEmail } from "../api";
 import { navigate } from "../router";
 import { formatDate } from "../utils/format";
 import { getCurrentUser, isLoggedIn, logout, saveAuthSession } from "../utils/auth";
@@ -13,6 +13,7 @@ export default function AccountPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState(null);
   const [sending, setSending] = useState(false);
+  const [upgradingSeller, setUpgradingSeller] = useState(false);
   const loggedIn = isLoggedIn();
 
   function handleLogout() {
@@ -35,6 +36,23 @@ export default function AccountPage() {
       setError(err);
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleBecomeSeller() {
+    setUpgradingSeller(true);
+    setMessage("");
+    setError(null);
+
+    try {
+      const data = await becomeSeller();
+      saveAuthSession({ user: data.user });
+      setAccount(data.user);
+      setMessage(data.message || "Your account has been upgraded to seller.");
+    } catch (err) {
+      setError(err);
+    } finally {
+      setUpgradingSeller(false);
     }
   }
 
@@ -126,6 +144,23 @@ export default function AccountPage() {
           </article>
         ) : null}
 
+        {account.emailVerifiedAt && account.role === "RENTER" ? (
+          <article className="account-card">
+            <h2>Become a Seller</h2>
+            <p className="auth-copy">Apply to list your own items on Borrowa. For now, verified renter accounts are upgraded instantly.</p>
+            <p className="helper-text">Future TODO: add seller verification, KYC, and manual approval before enabling payouts.</p>
+            {error ? (
+              <div className="error-box" role="alert">
+                <strong>{error.message}</strong>
+              </div>
+            ) : null}
+            {message ? <div className="success-box">{message}</div> : null}
+            <button className="primary-button full-width" disabled={upgradingSeller} onClick={handleBecomeSeller} type="button">
+              {upgradingSeller ? "Applying..." : "Apply to become a seller"}
+            </button>
+          </article>
+        ) : null}
+
         <article className="account-card">
           <h2>Marketplace Summary</h2>
           <div className="account-stats">
@@ -138,7 +173,7 @@ export default function AccountPage() {
               <span>Upcoming bookings</span>
             </div>
             <div>
-              <strong>Verified</strong>
+              <strong>{account.role}</strong>
               <span>Account role</span>
             </div>
           </div>

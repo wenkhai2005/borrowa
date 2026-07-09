@@ -32,7 +32,7 @@ export default function LoginPage() {
       <div className="auth-card">
         <p className="eyebrow">Welcome back</p>
         <h1>Login</h1>
-        <p className="auth-copy">Access your bookings and account details.</p>
+        <p className="auth-copy">Borrow smarter. Own less. Access your bookings and account details.</p>
 
         <form onSubmit={handleSubmit}>
           <ErrorMessage error={error} />
@@ -66,7 +66,7 @@ export default function LoginPage() {
         </form>
 
         <p className="auth-switch">
-          New to Camera Rental?{" "}
+          New to Borrowa?{" "}
           <button onClick={() => navigate("/register")} type="button">
             Create an account
           </button>

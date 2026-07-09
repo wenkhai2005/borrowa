@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Borrowa logo">
+  <defs>
+    <linearGradient id="borrowaBlue" x1="72" y1="40" x2="438" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F8BFF"/>
+      <stop offset="0.52" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <path
+    d="M117 67H337C405 67 450 112 450 180C450 227 426 262 386 278C426 293 450 328 450 376C450 444 405 489 337 489H117C74 489 45 460 45 417V265C45 202 90 157 153 157H242V206H153C118 206 94 230 94 265V417C94 432 102 440 117 440H337C376 440 401 415 401 376C401 337 376 312 337 312H261C246 312 236 302 236 287C236 272 246 263 261 263H337C376 263 401 238 401 180C401 141 376 116 337 116H117C102 116 94 124 94 139V235L45 282V139C45 96 74 67 117 67Z"
+    fill="url(#borrowaBlue)"
+  />
+  <path
+    d="M62 277H172V229C172 220 183 216 189 222L270 303C276 309 276 319 270 325L189 406C183 412 172 408 172 399V351H62C48 351 38 341 38 327V301C38 287 48 277 62 277Z"
+    fill="url(#borrowaBlue)"
+  />
+</svg>

@@ -6,6 +6,15 @@ function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function isHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function validateListingPayload(payload, options = {}) {
   const { partial = false } = options;
   const errors = {};
@@ -74,8 +83,30 @@ function validateListingPayload(payload, options = {}) {
       data.imageUrl = null;
     } else if (!isNonEmptyString(payload.imageUrl)) {
       errors.imageUrl = "Must be a string URL.";
+    } else if (!isHttpUrl(payload.imageUrl.trim())) {
+      errors.imageUrl = "Must be an http or https image URL.";
     } else {
       data.imageUrl = payload.imageUrl.trim();
+    }
+  }
+
+  if (payload.imageUrls !== undefined) {
+    if (payload.imageUrls === null) {
+      data.imageUrls = null;
+    } else if (!Array.isArray(payload.imageUrls)) {
+      errors.imageUrls = "Must be an array of image URLs.";
+    } else if (payload.imageUrls.length > 5) {
+      errors.imageUrls = "Upload up to 5 images per listing.";
+    } else {
+      const imageUrls = payload.imageUrls.map((url) => (typeof url === "string" ? url.trim() : ""));
+      const invalidUrl = imageUrls.find((url) => !url || !isHttpUrl(url));
+
+      if (invalidUrl !== undefined) {
+        errors.imageUrls = "Each image must be an http or https URL.";
+      } else {
+        data.imageUrls = imageUrls;
+        data.imageUrl = imageUrls[0] || null;
+      }
     }
   }
 

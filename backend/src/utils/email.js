@@ -1,6 +1,9 @@
 const nodemailer = require("nodemailer");
 const env = require("../config/env");
 
+const BRAND_NAME = "Borrowa";
+const BRAND_TAGLINE = "Borrow smarter. Own less.";
+
 function hasSmtpConfig() {
   return Boolean(env.smtp.host && env.smtp.port && env.smtp.user && env.smtp.pass && env.smtp.from);
 }
@@ -22,7 +25,7 @@ function formatMoney(value) {
 
 function bookingSummary(booking) {
   return {
-    listingTitle: booking.listing?.title || "Camera rental listing",
+    listingTitle: booking.listing?.title || "Borrowa listing",
     listingOwnerName: booking.listing?.ownerName || "Seller",
     listingOwnerEmail: booking.listing?.ownerEmail || "",
     renterName: booking.renterName,
@@ -37,6 +40,8 @@ function bookingSummary(booking) {
 function buildBookingEmail(booking, heading, nextStep) {
   const summary = bookingSummary(booking);
   const text = [
+    `${BRAND_NAME} — ${BRAND_TAGLINE}`,
+    "",
     heading,
     "",
     `Listing: ${summary.listingTitle}`,
@@ -50,6 +55,7 @@ function buildBookingEmail(booking, heading, nextStep) {
   ].join("\n");
 
   const html = `
+    <p><strong>${BRAND_NAME}</strong><br />${BRAND_TAGLINE}</p>
     <h2>${heading}</h2>
     <ul>
       <li><strong>Listing:</strong> ${summary.listingTitle}</li>
@@ -70,6 +76,8 @@ function buildRefundEmail(booking, heading, nextStep) {
   const refundReason = booking.refundReason || "No reason provided";
   const responseNote = booking.refundResponseNote || "No response note yet";
   const text = [
+    `${BRAND_NAME} — ${BRAND_TAGLINE}`,
+    "",
     heading,
     "",
     `Listing: ${summary.listingTitle}`,
@@ -86,6 +94,7 @@ function buildRefundEmail(booking, heading, nextStep) {
   ].join("\n");
 
   const html = `
+    <p><strong>${BRAND_NAME}</strong><br />${BRAND_TAGLINE}</p>
     <h2>${heading}</h2>
     <ul>
       <li><strong>Listing:</strong> ${summary.listingTitle}</li>
@@ -108,6 +117,8 @@ function buildCompletionEmail(booking, heading, nextStep) {
   const summary = bookingSummary(booking);
   const completionNote = booking.completionNote || "No completion note provided";
   const text = [
+    `${BRAND_NAME} — ${BRAND_TAGLINE}`,
+    "",
     heading,
     "",
     `Listing: ${summary.listingTitle}`,
@@ -122,6 +133,7 @@ function buildCompletionEmail(booking, heading, nextStep) {
   ].join("\n");
 
   const html = `
+    <p><strong>${BRAND_NAME}</strong><br />${BRAND_TAGLINE}</p>
     <h2>${heading}</h2>
     <ul>
       <li><strong>Listing:</strong> ${summary.listingTitle}</li>
@@ -143,7 +155,7 @@ function damageReportSummary(report) {
   const listing = booking.listing || {};
 
   return {
-    listingTitle: listing.title || "Camera rental listing",
+    listingTitle: listing.title || "Borrowa listing",
     sellerEmail: report.sellerEmail,
     renterEmail: report.renterEmail,
     renterName: booking.renterName || "Renter",
@@ -159,6 +171,8 @@ function damageReportSummary(report) {
 function buildDamageReportEmail(report, heading, nextStep) {
   const summary = damageReportSummary(report);
   const text = [
+    `${BRAND_NAME} — ${BRAND_TAGLINE}`,
+    "",
     heading,
     "",
     `Listing: ${summary.listingTitle}`,
@@ -174,6 +188,7 @@ function buildDamageReportEmail(report, heading, nextStep) {
   ].join("\n");
 
   const html = `
+    <p><strong>${BRAND_NAME}</strong><br />${BRAND_TAGLINE}</p>
     <h2>${heading}</h2>
     <ul>
       <li><strong>Listing:</strong> ${summary.listingTitle}</li>
@@ -192,12 +207,14 @@ function buildDamageReportEmail(report, heading, nextStep) {
 }
 
 function buildChatMessageEmail({ booking, message }) {
-  const listingTitle = booking.listing?.title || "Camera rental listing";
+  const listingTitle = booking.listing?.title || "Borrowa listing";
   const sender = `${message.senderName} <${message.senderEmail}>`;
   const startDate = formatDate(booking.startDate);
   const endDate = formatDate(booking.endDate);
   const preview = message.message.length > 180 ? `${message.message.slice(0, 180)}...` : message.message;
   const text = [
+    `${BRAND_NAME} — ${BRAND_TAGLINE}`,
+    "",
     "New message about your booking",
     "",
     `Listing: ${listingTitle}`,
@@ -209,6 +226,7 @@ function buildChatMessageEmail({ booking, message }) {
   ].join("\n");
 
   const html = `
+    <p><strong>${BRAND_NAME}</strong><br />${BRAND_TAGLINE}</p>
     <h2>New message about your booking</h2>
     <ul>
       <li><strong>Listing:</strong> ${listingTitle}</li>
@@ -226,7 +244,7 @@ function buildEmailVerificationEmail({ name, verificationUrl }) {
   const text = [
     `Hi ${name},`,
     "",
-    "Please verify your Camera Rental account email address.",
+    `Please verify your ${BRAND_NAME} account email address.`,
     "",
     `Verify email: ${verificationUrl}`,
     "",
@@ -236,7 +254,8 @@ function buildEmailVerificationEmail({ name, verificationUrl }) {
   const html = `
     <h2>Verify your email address</h2>
     <p>Hi ${name},</p>
-    <p>Please verify your Camera Rental account email address.</p>
+    <p>Please verify your ${BRAND_NAME} account email address.</p>
+    <p>${BRAND_TAGLINE}</p>
     <p><a href="${verificationUrl}">Verify email</a></p>
     <p>This link expires in 24 hours.</p>
   `;
@@ -258,7 +277,7 @@ async function sendEmail({ to, subject, html, text }) {
   const transporter = nodemailer.createTransport({
     host: env.smtp.host,
     port: env.smtp.port,
-    secure: env.smtp.port === 465,
+    secure: env.smtp.secure ?? env.smtp.port === 465,
     auth: {
       user: env.smtp.user,
       pass: env.smtp.pass
@@ -306,7 +325,7 @@ function sendNewChatMessageEmail({ booking, message, recipientEmail }) {
   const content = buildChatMessageEmail({ booking, message });
   return sendEmail({
     to: recipientEmail,
-    subject: "New message about your booking",
+    subject: `${BRAND_NAME}: New message about your booking`,
     ...content
   });
 }
@@ -319,7 +338,7 @@ function sendEmailVerificationEmail({ user, verificationUrl }) {
 
   return sendEmail({
     to: user.email,
-    subject: "Verify your Camera Rental email",
+    subject: `Verify your ${BRAND_NAME} email`,
     ...content
   });
 }
@@ -328,7 +347,7 @@ function sendNewBookingRequestEmailToSeller(booking) {
   return sendBookingEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `New booking request for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: New booking request for ${booking.listing?.title || "your listing"}`,
     heading: "New booking request received",
     nextStep: "Open Seller Dashboard > Booking Requests to accept or decline this request."
   });
@@ -338,7 +357,7 @@ function sendBookingRequestSubmittedEmailToRenter(booking) {
   return sendBookingEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your booking request was submitted",
+    subject: `${BRAND_NAME}: Your booking request was submitted`,
     heading: "Booking request submitted",
     nextStep: "Wait for the seller to accept or decline your request."
   });
@@ -348,7 +367,7 @@ function sendBookingConfirmedEmailToRenter(booking) {
   return sendBookingEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your booking is confirmed",
+    subject: `${BRAND_NAME}: Your booking is confirmed`,
     heading: "Your booking is confirmed",
     nextStep: "Coordinate pickup or delivery with the seller before the rental start date."
   });
@@ -358,7 +377,7 @@ function sendBookingAcceptedEmailToSeller(booking) {
   return sendBookingEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `Booking accepted for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Booking accepted for ${booking.listing?.title || "your listing"}`,
     heading: "Booking accepted",
     nextStep: "Prepare the gear and coordinate handoff with the renter."
   });
@@ -368,7 +387,7 @@ function sendBookingDeclinedEmailToRenter(booking) {
   return sendBookingEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your booking request was declined",
+    subject: `${BRAND_NAME}: Your booking request was declined`,
     heading: "Booking request declined",
     nextStep: "Browse other available gear and submit a new request."
   });
@@ -378,7 +397,7 @@ function sendBookingDeclinedEmailToSeller(booking) {
   return sendBookingEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `Booking declined for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Booking declined for ${booking.listing?.title || "your listing"}`,
     heading: "Booking declined",
     nextStep: "No further action is required."
   });
@@ -388,7 +407,7 @@ function sendRefundRequestEmailToSeller(booking) {
   return sendRefundEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `Refund requested for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Refund requested for ${booking.listing?.title || "your listing"}`,
     heading: "Refund request received",
     nextStep: "Open Seller Dashboard > Refund Requests to approve or reject this request."
   });
@@ -398,7 +417,7 @@ function sendRefundRequestSubmittedEmailToRenter(booking) {
   return sendRefundEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your refund request was submitted",
+    subject: `${BRAND_NAME}: Your refund request was submitted`,
     heading: "Refund request submitted",
     nextStep: "Wait for the seller to approve or reject your refund request."
   });
@@ -408,7 +427,7 @@ function sendRefundApprovedEmailToRenter(booking) {
   return sendRefundEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your refund request was approved",
+    subject: `${BRAND_NAME}: Your refund request was approved`,
     heading: "Refund approved",
     nextStep: "The refund is approved. Payment processing is still mocked in this MVP."
   });
@@ -418,7 +437,7 @@ function sendRefundApprovedEmailToSeller(booking) {
   return sendRefundEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `Refund approved for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Refund approved for ${booking.listing?.title || "your listing"}`,
     heading: "Refund approved confirmation",
     nextStep: "No further action is required in this MVP."
   });
@@ -428,7 +447,7 @@ function sendRefundRejectedEmailToRenter(booking) {
   return sendRefundEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your refund request was rejected",
+    subject: `${BRAND_NAME}: Your refund request was rejected`,
     heading: "Refund rejected",
     nextStep: "Review the seller response note in My Bookings."
   });
@@ -438,7 +457,7 @@ function sendRefundRejectedEmailToSeller(booking) {
   return sendRefundEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `Refund rejected for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Refund rejected for ${booking.listing?.title || "your listing"}`,
     heading: "Refund rejected confirmation",
     nextStep: "No further action is required."
   });
@@ -448,7 +467,7 @@ function sendBookingCompletedEmailToRenter(booking) {
   return sendCompletionEmail({
     booking,
     to: booking.renterEmail,
-    subject: "Your booking is completed",
+    subject: `${BRAND_NAME}: Your booking is completed`,
     heading: "Booking completed",
     nextStep: "The seller marked the item as returned. Deposit or refund handling is separate for now."
   });
@@ -458,7 +477,7 @@ function sendBookingCompletedEmailToSeller(booking) {
   return sendCompletionEmail({
     booking,
     to: booking.listing?.ownerEmail,
-    subject: `Booking completed for ${booking.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Booking completed for ${booking.listing?.title || "your listing"}`,
     heading: "Booking completed confirmation",
     nextStep: "No further action is required unless deposit or refund handling is needed separately."
   });
@@ -468,7 +487,7 @@ function sendDamageReportedEmailToRenter(report) {
   return sendDamageReportEmail({
     report,
     to: report.renterEmail,
-    subject: `Damage reported for ${report.booking?.listing?.title || "your booking"}`,
+    subject: `${BRAND_NAME}: Damage reported for ${report.booking?.listing?.title || "your booking"}`,
     heading: "Damage report submitted",
     nextStep: "The platform or seller will review this manually. No payment deduction is processed in this MVP."
   });
@@ -478,7 +497,7 @@ function sendDamageReportSubmittedEmailToSeller(report) {
   return sendDamageReportEmail({
     report,
     to: report.sellerEmail,
-    subject: `Damage report recorded for ${report.booking?.listing?.title || "your listing"}`,
+    subject: `${BRAND_NAME}: Damage report recorded for ${report.booking?.listing?.title || "your listing"}`,
     heading: "Damage report recorded",
     nextStep: "The report is recorded. Manual dispute resolution is not implemented yet."
   });

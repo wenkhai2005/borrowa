@@ -6,7 +6,7 @@ const { signToken, toPublicUser } = require("../utils/auth");
 const env = require("../config/env");
 const HttpError = require("../utils/httpError");
 const { sendEmailVerificationEmail } = require("../utils/email");
-const { validateLoginPayload, validateRegisterPayload } = require("../validators/authValidator");
+const { validateEmailPayload, validateLoginPayload, validateRegisterPayload } = require("../validators/authValidator");
 
 const verificationTokenTtlMs = 24 * 60 * 60 * 1000;
 
@@ -47,6 +47,48 @@ async function issueVerificationEmail(user) {
   return updatedUser;
 }
 
+async function issuePendingVerificationEmail(email) {
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+
+  if (existingUser) {
+    throw new HttpError(409, "Email is already registered.");
+  }
+
+  const verification = createVerificationToken();
+  const pendingRegistration = await prisma.pendingRegistration.upsert({
+    where: { email },
+    update: {
+      emailVerificationHash: verification.tokenHash,
+      emailVerificationExpiresAt: verification.expiresAt,
+      emailVerifiedAt: null
+    },
+    create: {
+      email,
+      emailVerificationHash: verification.tokenHash,
+      emailVerificationExpiresAt: verification.expiresAt
+    }
+  });
+
+  await sendEmailVerificationEmail({
+    user: { name: "there", email },
+    verificationUrl: getVerificationUrl(verification.token)
+  });
+
+  return pendingRegistration;
+}
+
+const sendRegistrationVerification = asyncHandler(async (req, res) => {
+  const data = validateEmailPayload(req.body);
+  await issuePendingVerificationEmail(data.email);
+
+  res.json({
+    data: {
+      email: data.email,
+      message: "Verification email sent."
+    }
+  });
+});
+
 const register = asyncHandler(async (req, res) => {
   const data = validateRegisterPayload(req.body);
   const existingUser = await prisma.user.findUnique({
@@ -57,21 +99,40 @@ const register = asyncHandler(async (req, res) => {
     throw new HttpError(409, "Email is already registered.");
   }
 
+  const tokenHash = hashVerificationToken(data.verificationToken);
+  const pendingRegistration = await prisma.pendingRegistration.findFirst({
+    where: {
+      email: data.email,
+      emailVerificationHash: tokenHash,
+      emailVerificationExpiresAt: { gt: new Date() },
+      emailVerifiedAt: { not: null }
+    }
+  });
+
+  if (!pendingRegistration) {
+    throw new HttpError(403, "Verify your email before creating an account.");
+  }
+
   const passwordHash = await bcrypt.hash(data.password, 12);
   const user = await prisma.user.create({
     data: {
       name: data.name,
       email: data.email,
+      phone: data.phone,
       passwordHash,
-      role: data.role
+      role: "RENTER",
+      emailVerifiedAt: pendingRegistration.emailVerifiedAt
     }
   });
-  const userWithVerification = await issueVerificationEmail(user);
+
+  await prisma.pendingRegistration.delete({
+    where: { id: pendingRegistration.id }
+  });
 
   res.status(201).json({
     data: {
-      token: signToken(userWithVerification),
-      user: toPublicUser(userWithVerification)
+      token: signToken(user),
+      user: toPublicUser(user)
     }
   });
 });
@@ -82,7 +143,7 @@ const login = asyncHandler(async (req, res) => {
     where: { email: data.email }
   });
 
-  if (!user) {
+  if (!user || !user.passwordHash) {
     throw new HttpError(401, "Invalid email or password.");
   }
 
@@ -112,6 +173,32 @@ const verifyEmail = asyncHandler(async (req, res) => {
   }
 
   const tokenHash = hashVerificationToken(token);
+  const pendingRegistration = await prisma.pendingRegistration.findFirst({
+    where: {
+      emailVerificationHash: tokenHash,
+      emailVerificationExpiresAt: { gt: new Date() }
+    }
+  });
+
+  if (pendingRegistration) {
+    const updatedPendingRegistration = await prisma.pendingRegistration.update({
+      where: { id: pendingRegistration.id },
+      data: {
+        emailVerifiedAt: new Date()
+      }
+    });
+
+    res.json({
+      data: {
+        email: updatedPendingRegistration.email,
+        verificationToken: token,
+        verified: true,
+        user: null
+      }
+    });
+    return;
+  }
+
   const user = await prisma.user.findFirst({
     where: {
       emailVerificationTokenHash: tokenHash,
@@ -145,10 +232,45 @@ const resendVerification = asyncHandler(async (req, res) => {
   res.json({ data: { message: "Verification email sent." } });
 });
 
+const becomeSeller = asyncHandler(async (req, res) => {
+  if (!req.user.emailVerifiedAt) {
+    throw new HttpError(403, "Verify your email before applying to become a seller.");
+  }
+
+  if (req.user.role === "SELLER") {
+    res.json({
+      data: {
+        user: toPublicUser(req.user),
+        message: "Your account is already a seller account."
+      }
+    });
+    return;
+  }
+
+  if (req.user.role !== "RENTER") {
+    throw new HttpError(400, "Only renter accounts can apply to become sellers.");
+  }
+
+  // TODO: Replace this instant upgrade with seller verification, KYC, and manual approval.
+  const updatedUser = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { role: "SELLER" }
+  });
+
+  res.json({
+    data: {
+      user: toPublicUser(updatedUser),
+      message: "Your account has been upgraded to seller."
+    }
+  });
+});
+
 module.exports = {
+  becomeSeller,
   login,
   me,
   register,
   resendVerification,
+  sendRegistrationVerification,
   verifyEmail
 };

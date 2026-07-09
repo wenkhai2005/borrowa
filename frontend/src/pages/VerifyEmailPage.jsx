@@ -30,6 +30,11 @@ export default function VerifyEmailPage({ path }) {
           return;
         }
 
+        if (!data.user && data.email && data.verificationToken) {
+          navigate(`/register?token=${encodeURIComponent(data.verificationToken)}&email=${encodeURIComponent(data.email)}`);
+          return;
+        }
+
         const currentUser = getCurrentUser();
         if (currentUser?.id === data.user.id) {
           saveAuthSession({

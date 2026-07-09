@@ -1,7 +1,7 @@
 import { navigate } from "./router";
 import { getToken, logout } from "./utils/auth";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 async function request(path, options = {}) {
   const token = getToken();
@@ -61,6 +61,13 @@ export function loginUser(data) {
   });
 }
 
+export function sendRegistrationVerification(email) {
+  return request("/api/auth/send-registration-verification", {
+    method: "POST",
+    body: JSON.stringify({ email })
+  });
+}
+
 export function getMe() {
   return request("/api/auth/me");
 }
@@ -71,6 +78,13 @@ export function verifyEmail(token) {
 
 export function resendVerificationEmail() {
   return request("/api/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify({})
+  });
+}
+
+export function becomeSeller() {
+  return request("/api/auth/become-seller", {
     method: "POST",
     body: JSON.stringify({})
   });
@@ -95,6 +109,52 @@ export function createListing(data) {
   return request("/api/listings", {
     method: "POST",
     body: JSON.stringify(data)
+  });
+}
+
+export function uploadListingImages(files, onProgress) {
+  const token = getToken();
+  const formData = new FormData();
+
+  files.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/api/uploads/listing-images`);
+
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    }
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && typeof onProgress === "function") {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      const payload = JSON.parse(xhr.responseText || "{}");
+
+      if (xhr.status === 401) {
+        logout();
+        navigate("/login");
+      }
+
+      if (xhr.status < 200 || xhr.status >= 300) {
+        const error = new Error(payload.message || "Image upload failed");
+        error.details = payload.details;
+        error.status = xhr.status;
+        reject(error);
+        return;
+      }
+
+      resolve(payload.data);
+    };
+
+    xhr.onerror = () => reject(new Error("Image upload failed"));
+    xhr.send(formData);
   });
 }
 

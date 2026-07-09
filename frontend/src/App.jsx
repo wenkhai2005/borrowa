@@ -2,6 +2,7 @@ import Layout from "./components/Layout";
 import AccountPage from "./pages/AccountPage";
 import BookingChatPage from "./pages/BookingChatPage";
 import CreateListingPage from "./pages/CreateListingPage";
+import HomePage from "./pages/HomePage";
 import ListingDetailPage from "./pages/ListingDetailPage";
 import ListingsPage from "./pages/ListingsPage";
 import LoginPage from "./pages/LoginPage";
@@ -49,6 +50,10 @@ function requireRole(role, page) {
 
 function getRoute(path) {
   if (path === "/") {
+    return <HomePage />;
+  }
+
+  if (path === "/explore" || path === "/marketplace") {
     return <ListingsPage />;
   }
 
@@ -99,8 +104,8 @@ function getRoute(path) {
     return <LoginPage />;
   }
 
-  if (path === "/register") {
-    return <RegisterPage />;
+  if (path === "/register" || path.startsWith("/register?")) {
+    return <RegisterPage path={path} />;
   }
 
   if (path.startsWith("/verify-email")) {

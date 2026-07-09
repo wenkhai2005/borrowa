@@ -114,7 +114,7 @@ export default function MyBookingsPage() {
         <div className="auth-card">
           <p className="eyebrow">Rental history</p>
           <h1>Login required</h1>
-          <p className="auth-copy">Login to view your camera rental bookings.</p>
+          <p className="auth-copy">Login to view your Borrowa bookings.</p>
           <button className="primary-button full-width" onClick={() => navigate("/login")} type="button">
             Login
           </button>
@@ -136,7 +136,7 @@ export default function MyBookingsPage() {
           <h1>My Bookings</h1>
           <p>Bookings for {renterEmail}</p>
         </div>
-        <button className="secondary-button" onClick={() => navigate("/")} type="button">
+        <button className="secondary-button" onClick={() => navigate("/explore")} type="button">
           Browse Gear
         </button>
       </div>
@@ -172,9 +172,9 @@ export default function MyBookingsPage() {
       {!loading && bookings.length === 0 && !error ? (
         <EmptyState
           title="No bookings found"
-          message="Your future camera rentals will appear here."
+          message="Your future Borrowa rentals will appear here."
           action={
-            <button className="primary-button" onClick={() => navigate("/")} type="button">
+            <button className="primary-button" onClick={() => navigate("/explore")} type="button">
               Browse Listings
             </button>
           }
@@ -196,7 +196,7 @@ export default function MyBookingsPage() {
                 <span className={getBookingStatusClass(booking.status)}>
                   {getBookingStatusLabel(booking.status)}
                 </span>
-                <h2>{booking.listing?.title || "Camera booking"}</h2>
+                <h2>{booking.listing?.title || "Borrowa booking"}</h2>
                 <p className="booking-dates">{formatDate(booking.startDate)} to {formatDate(booking.endDate)}</p>
                 <p className="meta">{booking.listing?.location || "Location unavailable"}</p>
                 {booking.completedAt ? (

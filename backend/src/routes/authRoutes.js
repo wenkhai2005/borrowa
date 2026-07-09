@@ -1,9 +1,11 @@
 const express = require("express");
 const {
+  becomeSeller,
   login,
   me,
   register,
   resendVerification,
+  sendRegistrationVerification,
   verifyEmail
 } = require("../controllers/authController");
 const createRateLimit = require("../middleware/rateLimit");
@@ -23,8 +25,10 @@ const resendVerificationRateLimit = createRateLimit({
 
 router.post("/register", authRateLimit, register);
 router.post("/login", authRateLimit, login);
+router.post("/send-registration-verification", authRateLimit, sendRegistrationVerification);
 router.get("/verify-email", verifyEmail);
 router.post("/resend-verification", requireAuth, resendVerificationRateLimit, resendVerification);
+router.post("/become-seller", requireAuth, becomeSeller);
 router.get("/me", requireAuth, me);
 
 module.exports = router;

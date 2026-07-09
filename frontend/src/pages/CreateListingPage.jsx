@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createListing } from "../api";
+import { createListing, uploadListingImages } from "../api";
 import { navigate } from "../router";
 import { ErrorMessage } from "../components/Status";
 import { getCurrentUser, isLoggedIn } from "../utils/auth";
@@ -57,15 +57,23 @@ const initialForm = {
   deposit: "",
   serialNumber: "",
   includedItems: "",
-  imageUrl: "",
   isAvailable: true
 };
+
+const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const maxImageSize = 5 * 1024 * 1024;
+
+function createImageId(file) {
+  const randomId = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  return `${file.name}-${file.lastModified}-${randomId}`;
+}
 
 export default function CreateListingPage() {
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [images, setImages] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const availableModels = modelOptions[form.cameraBrand]?.[form.category] || [];
   const usesCustomModel = Boolean(form.cameraBrand) && (form.cameraModel === "Other model" || availableModels.length === 0);
@@ -100,29 +108,50 @@ export default function CreateListingPage() {
   }
 
   function handleImageFile(event) {
-    const file = event.target.files?.[0];
+    const selectedFiles = Array.from(event.target.files || []);
+    event.target.value = "";
 
-    if (!file) {
+    if (selectedFiles.length === 0) {
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
-      setError(new Error("Please upload an image file."));
+    if (images.length + selectedFiles.length > 5) {
+      setError(new Error("Upload up to 5 images per listing."));
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError(new Error("Image must be 5MB or smaller."));
+    const invalidFile = selectedFiles.find((file) => !allowedImageTypes.has(file.type));
+    if (invalidFile) {
+      setError(new Error("Only jpg, jpeg, png, and webp images are allowed."));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || "");
-      setImagePreview(result);
-      setForm((current) => ({ ...current, imageUrl: result }));
-    };
-    reader.readAsDataURL(file);
+    const oversizedFile = selectedFiles.find((file) => file.size > maxImageSize);
+    if (oversizedFile) {
+      setError(new Error("Each image must be 5MB or smaller."));
+      return;
+    }
+
+    setError(null);
+    setImages((current) => [
+      ...current,
+      ...selectedFiles.map((file) => ({
+        id: createImageId(file),
+        file,
+        previewUrl: URL.createObjectURL(file)
+      }))
+    ]);
+  }
+
+  function removeImage(id) {
+    setImages((current) => {
+      const image = current.find((item) => item.id === id);
+      if (image) {
+        URL.revokeObjectURL(image.previewUrl);
+      }
+
+      return current.filter((item) => item.id !== id);
+    });
   }
 
   async function handleSubmit(event) {
@@ -140,19 +169,23 @@ export default function CreateListingPage() {
       }
 
       const selectedModel = usesCustomModel ? form.customModel : form.cameraModel;
+      const uploadedImages = images.length > 0
+        ? await uploadListingImages(images.map((image) => image.file), setUploadProgress)
+        : { urls: [] };
       const { customModel, ...listingPayload } = form;
       const listing = await createListing({
         ...listingPayload,
         cameraModel: selectedModel,
         dailyRate: Number(form.dailyRate),
         deposit: Number(form.deposit),
-        imageUrl: form.imageUrl || null
+        imageUrls: uploadedImages.urls
       });
       navigate(`/listings/${listing.id}`);
     } catch (err) {
       setError(err);
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   }
 
@@ -265,13 +298,28 @@ export default function CreateListingPage() {
         </label>
 
         <label>
-          Upload image
-          <input accept="image/*" onChange={handleImageFile} type="file" />
+          Upload images
+          <input accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple onChange={handleImageFile} type="file" />
+          <span className="helper-text">Add up to 5 images. JPG, JPEG, PNG, or WEBP only. Max 5MB each.</span>
         </label>
 
-        {imagePreview ? (
-          <div className="image-preview">
-            <img alt="Listing preview" src={imagePreview} />
+        {images.length > 0 ? (
+          <div className="image-preview-grid">
+            {images.map((image, index) => (
+              <div className="image-preview" key={image.id}>
+                <img alt={`Listing preview ${index + 1}`} src={image.previewUrl} />
+                <button onClick={() => removeImage(image.id)} type="button">
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {submitting && uploadProgress > 0 ? (
+          <div className="upload-progress" aria-live="polite">
+            <span>Uploading images: {uploadProgress}%</span>
+            <progress max="100" value={uploadProgress} />
           </div>
         ) : null}
 
@@ -281,7 +329,7 @@ export default function CreateListingPage() {
         </label>
 
         <div className="button-row">
-          <button className="secondary-button" onClick={() => navigate("/")} type="button">
+          <button className="secondary-button" onClick={() => navigate("/explore")} type="button">
             Cancel
           </button>
           <button className="primary-button" disabled={submitting} type="submit">
