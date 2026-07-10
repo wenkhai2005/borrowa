@@ -70,12 +70,13 @@ PORT=4000
 FRONTEND_URL="http://localhost:5173"
 FRONTEND_URLS="http://localhost:5173"
 JWT_SECRET="replace-this-with-a-long-random-secret"
+RESEND_API_KEY=""
+EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
 SMTP_HOST=""
 SMTP_PORT="587"
 SMTP_SECURE="false"
 SMTP_USER=""
 SMTP_PASS=""
-EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
 CLOUDINARY_CLOUD_NAME="your-cloud-name"
 CLOUDINARY_API_KEY="your-api-key"
 CLOUDINARY_API_SECRET="your-api-secret"
@@ -86,6 +87,7 @@ For production, set `NODE_ENV=production` and provide a strong `JWT_SECRET`. The
 
 Email verification links use `FRONTEND_URL`, so keep it set to the public frontend URL in deployed environments. CORS uses `FRONTEND_URLS`, a comma-separated list of allowed frontend origins.
 Listing image uploads use Cloudinary. Set the `CLOUDINARY_*` variables before creating listings with uploaded images.
+Transactional email uses Resend when `RESEND_API_KEY` is configured. SMTP remains an optional fallback for environments that allow outbound SMTP. On Render free web services, use Resend because outbound SMTP ports are blocked.
 
 ## 3. Set Up Frontend
 
@@ -118,7 +120,7 @@ Target production architecture:
 - Backend: Google Cloud Run
 - Database: Google Cloud SQL PostgreSQL
 - Images: Cloudinary
-- Email: SMTP
+- Email: Resend HTTPS API, with optional SMTP fallback
 
 ### Backend Production Environment
 
@@ -131,12 +133,13 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
 JWT_SECRET="use-a-long-random-production-secret"
 FRONTEND_URL="https://borrowa.com"
 FRONTEND_URLS="https://borrowa.my,https://borrowa-y1mj185zv-borrowa.vercel.app"
+RESEND_API_KEY="re_your_resend_api_key"
+EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
 SMTP_HOST="smtp.example.com"
 SMTP_PORT="587"
 SMTP_SECURE="false"
 SMTP_USER="smtp-user"
 SMTP_PASS="smtp-password"
-EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
 CLOUDINARY_CLOUD_NAME="cloud-name"
 CLOUDINARY_API_KEY="api-key"
 CLOUDINARY_API_SECRET="api-secret"
@@ -173,10 +176,10 @@ gcloud run deploy borrowa-backend \
   --region REGION \
   --allow-unauthenticated \
   --set-env-vars NODE_ENV=production,FRONTEND_URL=https://borrowa.com,FRONTEND_URLS=https://borrowa.my\\,https://borrowa-y1mj185zv-borrowa.vercel.app \
-  --set-secrets DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,SMTP_PASS=SMTP_PASS:latest,CLOUDINARY_API_SECRET=CLOUDINARY_API_SECRET:latest
+  --set-secrets DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,RESEND_API_KEY=RESEND_API_KEY:latest,CLOUDINARY_API_SECRET=CLOUDINARY_API_SECRET:latest
 ```
 
-Add the remaining SMTP and Cloudinary variables in Cloud Run environment variables or Secret Manager. If Cloud Run connects to Cloud SQL through a private IP or Cloud SQL connection, configure the Cloud Run service networking accordingly.
+Add `EMAIL_FROM` and the remaining Cloudinary variables in Cloud Run environment variables or Secret Manager. SMTP variables are optional fallback only. If Cloud Run connects to Cloud SQL through a private IP or Cloud SQL connection, configure the Cloud Run service networking accordingly.
 
 ### Firebase Hosting Deployment
 

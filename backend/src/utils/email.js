@@ -1,11 +1,38 @@
 const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const env = require("../config/env");
+const HttpError = require("./httpError");
 
 const BRAND_NAME = "Borrowa";
 const BRAND_TAGLINE = "Borrow smarter. Own less.";
 
 function hasSmtpConfig() {
   return Boolean(env.smtp.host && env.smtp.port && env.smtp.user && env.smtp.pass && env.smtp.from);
+}
+
+function hasResendConfig() {
+  return Boolean(env.resend.apiKey);
+}
+
+function getEmailProvider() {
+  if (hasResendConfig()) {
+    return "resend";
+  }
+
+  if (hasSmtpConfig()) {
+    return "smtp";
+  }
+
+  return "mock";
+}
+
+function safeEmailError(provider, error) {
+  return {
+    provider,
+    name: error.name,
+    message: error.message,
+    statusCode: error.statusCode || error.status
+  };
 }
 
 function formatDate(value) {
@@ -264,20 +291,59 @@ function buildEmailVerificationEmail({ name, verificationUrl }) {
 }
 
 async function sendEmail({ to, subject, html, text }) {
+  const provider = getEmailProvider();
+
   if (!to) {
-    console.log("[email:skipped] Missing recipient", { subject, text });
+    if (provider === "mock") {
+      console.log("[email:skipped]", { provider, reason: "missing_recipient", subject });
+      return;
+    }
+
+    console.error("[email:error]", { provider, subject, message: "Missing email recipient" });
+    throw new HttpError(502, "Email delivery failed. Please try again later.");
+  }
+
+  if (provider === "mock") {
+    console.log("[email:mock]", { provider, to, from: env.smtp.from || env.resend.from || "mock", subject });
     return;
   }
 
-  if (!hasSmtpConfig()) {
-    console.log("[email:mock]", { to, from: env.smtp.from || "mock", subject, text, html });
-    return;
+  if (provider === "resend") {
+    if (!env.resend.from) {
+      console.error("[email:error]", { provider, to, subject, message: "EMAIL_FROM is not configured" });
+      throw new HttpError(502, "Email delivery is not configured.");
+    }
+
+    const resend = new Resend(env.resend.apiKey);
+
+    try {
+      const result = await resend.emails.send({
+        from: env.resend.from,
+        to,
+        subject,
+        html,
+        text
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      console.log("[email:sent]", { provider, to, subject, messageId: result.data?.id });
+      return;
+    } catch (error) {
+      console.error("[email:error]", safeEmailError(provider, error));
+      throw new HttpError(502, "Email delivery failed. Please try again later.");
+    }
   }
 
   const transporter = nodemailer.createTransport({
     host: env.smtp.host,
     port: env.smtp.port,
     secure: env.smtp.secure ?? env.smtp.port === 465,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     auth: {
       user: env.smtp.user,
       pass: env.smtp.pass
@@ -292,12 +358,10 @@ async function sendEmail({ to, subject, html, text }) {
       html,
       text
     });
+    console.log("[email:sent]", { provider, to, subject });
   } catch (error) {
-    console.error("[email:error]", {
-      to,
-      subject,
-      message: error.message
-    });
+    console.error("[email:error]", safeEmailError(provider, error));
+    throw new HttpError(502, "Email delivery failed. Please try again later.");
   }
 }
 

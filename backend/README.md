@@ -37,6 +37,8 @@ Email verification links are generated from `FRONTEND_URL`; set it to the deploy
 
 Listing image uploads use Cloudinary. Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, and optionally `CLOUDINARY_FOLDER` in `.env`.
 
+Transactional email uses Resend when `RESEND_API_KEY` is configured. SMTP remains an optional fallback for environments that allow outbound SMTP. On Render free web services, use Resend because outbound SMTP ports are blocked.
+
 Production deployments to Cloud Run should provide:
 
 ```env
@@ -46,12 +48,13 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
 JWT_SECRET="use-a-long-random-production-secret"
 FRONTEND_URL="https://borrowa.com"
 FRONTEND_URLS="https://borrowa.my,https://borrowa-y1mj185zv-borrowa.vercel.app"
+RESEND_API_KEY="re_your_resend_api_key"
+EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
 SMTP_HOST="smtp.example.com"
 SMTP_PORT="587"
 SMTP_SECURE="false"
 SMTP_USER="smtp-user"
 SMTP_PASS="smtp-password"
-EMAIL_FROM="Borrowa <no-reply@borrowa.com>"
 CLOUDINARY_CLOUD_NAME="cloud-name"
 CLOUDINARY_API_KEY="api-key"
 CLOUDINARY_API_SECRET="api-secret"
