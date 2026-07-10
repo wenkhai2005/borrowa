@@ -14,9 +14,19 @@ const errorHandler = require("./middleware/errorHandler");
 const notFound = require("./middleware/notFound");
 
 const app = express();
+const allowedOrigins = new Set(env.frontendUrls);
 
 app.use(helmet());
-app.use(cors({ origin: env.frontendUrl }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin.replace(/\/$/, ""))) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  }
+}));
 app.use(express.json({ limit: "8mb" }));
 app.use(morgan("dev"));
 

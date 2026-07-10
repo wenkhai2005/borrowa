@@ -68,6 +68,7 @@ The backend `.env` should match your PostgreSQL connection:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/camera_rental?schema=public"
 PORT=4000
 FRONTEND_URL="http://localhost:5173"
+FRONTEND_URLS="http://localhost:5173"
 JWT_SECRET="replace-this-with-a-long-random-secret"
 SMTP_HOST=""
 SMTP_PORT="587"
@@ -83,7 +84,7 @@ CLOUDINARY_FOLDER="borrowa/listings"
 
 For production, set `NODE_ENV=production` and provide a strong `JWT_SECRET`. The backend will refuse to start in production without it.
 
-Email verification links use `FRONTEND_URL`, so keep it set to the public frontend URL in deployed environments.
+Email verification links use `FRONTEND_URL`, so keep it set to the public frontend URL in deployed environments. CORS uses `FRONTEND_URLS`, a comma-separated list of allowed frontend origins.
 Listing image uploads use Cloudinary. Set the `CLOUDINARY_*` variables before creating listings with uploaded images.
 
 ## 3. Set Up Frontend
@@ -129,6 +130,7 @@ PORT=8080
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
 JWT_SECRET="use-a-long-random-production-secret"
 FRONTEND_URL="https://borrowa.com"
+FRONTEND_URLS="https://borrowa.my,https://borrowa-y1mj185zv-borrowa.vercel.app"
 SMTP_HOST="smtp.example.com"
 SMTP_PORT="587"
 SMTP_SECURE="false"
@@ -170,7 +172,7 @@ gcloud run deploy borrowa-backend \
   --image REGION-docker.pkg.dev/PROJECT_ID/borrowa/backend:latest \
   --region REGION \
   --allow-unauthenticated \
-  --set-env-vars NODE_ENV=production,FRONTEND_URL=https://borrowa.com \
+  --set-env-vars NODE_ENV=production,FRONTEND_URL=https://borrowa.com,FRONTEND_URLS=https://borrowa.my\\,https://borrowa-y1mj185zv-borrowa.vercel.app \
   --set-secrets DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,SMTP_PASS=SMTP_PASS:latest,CLOUDINARY_API_SECRET=CLOUDINARY_API_SECRET:latest
 ```
 

@@ -7,6 +7,159 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Listing {
+  id               String                   @id @default(cuid())
+  title            String
+  description      String
+  cameraBrand      String
+  cameraModel      String
+  location         String
+  dailyRate        Decimal                  @db.Decimal(10, 2)
+  imageUrl         String?
+  isAvailable      Boolean                  @default(true)
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  category         String                   @default("Camera")
+  ownerName        String                   @default("Unknown Owner")
+  ownerEmail       String                   @default("")
+  deposit          Decimal                  @default(0) @db.Decimal(10, 2)
+  serialNumber     String                   @default("")
+  includedItems    String                   @default("")
+  imageUrls        Json?
+  bookings         Booking[]
+  unavailableDates ListingUnavailableDate[]
+
+  @@index([ownerEmail])
+}
+
+model ListingUnavailableDate {
+  id        String              @id @default(cuid())
+  listingId String
+  startDate DateTime
+  endDate   DateTime
+  reason    String?
+  type      UnavailableDateType @default(SELLER_BLOCKED)
+  bookingId String?
+  createdAt DateTime            @default(now())
+  listing   Listing             @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@index([listingId, startDate, endDate])
+  @@index([bookingId])
+}
+
+model Booking {
+  id                 String         @id @default(cuid())
+  listingId          String
+  renterName         String
+  renterEmail        String
+  startDate          DateTime
+  endDate            DateTime
+  totalPrice         Decimal        @db.Decimal(10, 2)
+  status             BookingStatus  @default(PENDING)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  paidAt             DateTime?
+  sellerRespondBy    DateTime?
+  sellerAcceptedAt   DateTime?
+  sellerDeclinedAt   DateTime?
+  expiredAt          DateTime?
+  refundedAt         DateTime?
+  refundReason       String?
+  refundStatus       RefundStatus   @default(NONE)
+  refundRequestedAt  DateTime?
+  refundRespondedAt  DateTime?
+  refundResponseNote String?
+  completedAt        DateTime?
+  completionNote     String?
+  platformFee        Decimal?       @db.Decimal(10, 2)
+  sellerEarnings     Decimal?       @db.Decimal(10, 2)
+  payoutStatus       PayoutStatus   @default(NOT_READY)
+  payoutAt           DateTime?
+  listing            Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  chatMessages       ChatMessage[]
+  damageReports      DamageReport[]
+  reviews            Review[]
+
+  @@index([listingId])
+  @@index([listingId, startDate, endDate])
+}
+
+model ChatMessage {
+  id          String         @id @default(cuid())
+  bookingId   String
+  senderEmail String
+  senderName  String
+  senderRole  ChatSenderRole
+  message     String
+  createdAt   DateTime       @default(now())
+  readAt      DateTime?
+  booking     Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([senderEmail])
+}
+
+model Review {
+  id            String     @id @default(cuid())
+  bookingId     String
+  reviewerEmail String
+  revieweeEmail String
+  reviewerRole  ReviewRole
+  rating        Int
+  comment       String?
+  createdAt     DateTime   @default(now())
+  booking       Booking    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, reviewerRole])
+  @@index([bookingId])
+  @@index([revieweeEmail])
+  @@index([reviewerEmail])
+}
+
+model DamageReport {
+  id          String             @id @default(cuid())
+  bookingId   String
+  sellerEmail String
+  renterEmail String
+  title       String
+  description String
+  claimAmount Decimal?           @db.Decimal(10, 2)
+  imageUrls   Json?
+  status      DamageReportStatus @default(OPEN)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  booking     Booking            @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([sellerEmail])
+  @@index([renterEmail])
+}
+
+model User {
+  id                         String    @id @default(cuid())
+  name                       String
+  email                      String    @unique
+  passwordHash               String?
+  role                       UserRole  @default(RENTER)
+  phone                      String?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+  emailVerifiedAt            DateTime?
+  emailVerificationTokenHash String?
+  emailVerificationExpiresAt DateTime?
+}
+
+model PendingRegistration {
+  id                         String    @id @default(cuid())
+  email                      String    @unique
+  emailVerificationHash      String?   @unique
+  emailVerificationExpiresAt DateTime?
+  emailVerifiedAt            DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+}
+
 enum UserRole {
   RENTER
   SELLER
@@ -16,12 +169,12 @@ enum UserRole {
 enum BookingStatus {
   PENDING
   CONFIRMED
-  COMPLETED
-  DISPUTED
+  CANCELLED
   DECLINED
   EXPIRED
   REFUNDED
-  CANCELLED
+  COMPLETED
+  DISPUTED
 }
 
 enum RefundStatus {
@@ -57,157 +210,4 @@ enum ChatSenderRole {
 enum ReviewRole {
   RENTER
   SELLER
-}
-
-model Listing {
-  id               String                   @id @default(cuid())
-  title            String
-  description      String
-  category         String                   @default("Camera")
-  cameraBrand      String
-  cameraModel      String
-  location         String
-  ownerName        String                   @default("Unknown Owner")
-  ownerEmail       String                   @default("")
-  dailyRate        Decimal                  @db.Decimal(10, 2)
-  deposit          Decimal                  @default(0) @db.Decimal(10, 2)
-  serialNumber     String                   @default("")
-  includedItems    String                   @default("")
-  imageUrl         String?
-  imageUrls        Json?
-  isAvailable      Boolean                  @default(true)
-  createdAt        DateTime                 @default(now())
-  updatedAt        DateTime                 @updatedAt
-  bookings         Booking[]
-  unavailableDates ListingUnavailableDate[]
-
-  @@index([ownerEmail])
-}
-
-model ListingUnavailableDate {
-  id        String              @id @default(cuid())
-  listingId String
-  listing   Listing             @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  startDate DateTime
-  endDate   DateTime
-  reason    String?
-  type      UnavailableDateType @default(SELLER_BLOCKED)
-  bookingId String?
-  createdAt DateTime            @default(now())
-
-  @@index([listingId])
-  @@index([listingId, startDate, endDate])
-  @@index([bookingId])
-}
-
-model Booking {
-  id                 String         @id @default(cuid())
-  listingId          String
-  renterName         String
-  renterEmail        String
-  startDate          DateTime
-  endDate            DateTime
-  totalPrice         Decimal        @db.Decimal(10, 2)
-  platformFee        Decimal?       @db.Decimal(10, 2)
-  sellerEarnings     Decimal?       @db.Decimal(10, 2)
-  payoutStatus       PayoutStatus   @default(NOT_READY)
-  payoutAt           DateTime?
-  status             BookingStatus  @default(PENDING)
-  paidAt             DateTime?
-  sellerRespondBy    DateTime?
-  sellerAcceptedAt   DateTime?
-  sellerDeclinedAt   DateTime?
-  expiredAt          DateTime?
-  refundedAt         DateTime?
-  refundReason       String?
-  refundStatus       RefundStatus   @default(NONE)
-  refundRequestedAt  DateTime?
-  refundRespondedAt  DateTime?
-  refundResponseNote String?
-  completedAt        DateTime?
-  completionNote     String?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  listing            Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  damageReports      DamageReport[]
-  chatMessages       ChatMessage[]
-  reviews            Review[]
-
-  @@index([listingId])
-  @@index([listingId, startDate, endDate])
-}
-
-model ChatMessage {
-  id          String         @id @default(cuid())
-  bookingId   String
-  booking     Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  senderEmail String
-  senderName  String
-  senderRole  ChatSenderRole
-  message     String
-  readAt      DateTime?
-  createdAt   DateTime       @default(now())
-
-  @@index([bookingId])
-  @@index([senderEmail])
-}
-
-model Review {
-  id            String     @id @default(cuid())
-  bookingId     String
-  booking       Booking    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  reviewerEmail String
-  revieweeEmail String
-  reviewerRole  ReviewRole
-  rating        Int
-  comment       String?
-  createdAt     DateTime   @default(now())
-
-  @@unique([bookingId, reviewerRole])
-  @@index([bookingId])
-  @@index([revieweeEmail])
-  @@index([reviewerEmail])
-}
-
-model DamageReport {
-  id          String             @id @default(cuid())
-  bookingId   String
-  booking     Booking            @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  sellerEmail String
-  renterEmail String
-  title       String
-  description String
-  claimAmount Decimal?           @db.Decimal(10, 2)
-  imageUrls   Json?
-  status      DamageReportStatus @default(OPEN)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-
-  @@index([bookingId])
-  @@index([sellerEmail])
-  @@index([renterEmail])
-}
-
-model User {
-  id                         String    @id @default(cuid())
-  name                       String
-  email                      String    @unique
-  passwordHash               String?
-  role                       UserRole  @default(RENTER)
-  phone                      String?
-  emailVerifiedAt            DateTime?
-  emailVerificationTokenHash String?
-  emailVerificationExpiresAt DateTime?
-  createdAt                  DateTime  @default(now())
-  updatedAt                  DateTime  @updatedAt
-}
-
-model PendingRegistration {
-  id                    String    @id @default(cuid())
-  email                 String    @unique
-  emailVerificationHash String?   @unique
-  emailVerificationExpiresAt DateTime?
-  emailVerifiedAt       DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
 }

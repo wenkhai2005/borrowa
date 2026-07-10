@@ -10,11 +10,14 @@ function isActive(currentPath, targetPath) {
   return currentPath.startsWith(targetPath);
 }
 
-function NavLink({ currentPath, path, children }) {
+function NavLink({ currentPath, onNavigate, path, children }) {
   return (
     <button
       className={isActive(currentPath, path) ? "nav-link active" : "nav-link"}
-      onClick={() => navigate(path)}
+      onClick={() => {
+        onNavigate?.();
+        navigate(path);
+      }}
       type="button"
     >
       {children}
@@ -55,15 +58,18 @@ export default function Layout({ currentPath, children }) {
   const [account, setAccount] = useState(() => getStoredAccount());
   const [loggedIn, setLoggedIn] = useState(() => isLoggedIn());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     setAccount(getStoredAccount());
     setLoggedIn(isLoggedIn());
     setMenuOpen(false);
+    setMobileNavOpen(false);
   }, [currentPath]);
 
   function goTo(path) {
     setMenuOpen(false);
+    setMobileNavOpen(false);
     navigate(path);
   }
 
@@ -71,10 +77,13 @@ export default function Layout({ currentPath, children }) {
     logout();
     setLoggedIn(false);
     setMenuOpen(false);
+    setMobileNavOpen(false);
     navigate("/login");
   }
 
   function handleBecomeHost() {
+    setMobileNavOpen(false);
+
     if (loggedIn && account?.role === "SELLER") {
       navigate("/listings/new");
       return;
@@ -88,6 +97,11 @@ export default function Layout({ currentPath, children }) {
     navigate("/register");
   }
 
+  function handleHowItWorks() {
+    setMobileNavOpen(false);
+    scrollToHowItWorks();
+  }
+
   return (
     <div className="app-shell">
       <header className="site-header">
@@ -95,11 +109,25 @@ export default function Layout({ currentPath, children }) {
           <img alt="" className="brand-icon" src="/borrowa-logo.svg" />
           <span>Borrowa</span>
         </button>
-        <nav className="site-nav" aria-label="Primary navigation">
-          <NavLink currentPath={currentPath} path="/explore">
+        <button
+          aria-expanded={mobileNavOpen}
+          aria-label="Toggle navigation menu"
+          className="mobile-menu-button"
+          onClick={() => {
+            setMobileNavOpen((open) => !open);
+            setMenuOpen(false);
+          }}
+          type="button"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+        <nav className={mobileNavOpen ? "site-nav mobile-open" : "site-nav"} aria-label="Primary navigation">
+          <NavLink currentPath={currentPath} onNavigate={() => setMobileNavOpen(false)} path="/explore">
             Explore
           </NavLink>
-          <button className="nav-link" onClick={scrollToHowItWorks} type="button">
+          <button className="nav-link" onClick={handleHowItWorks} type="button">
             How it works
           </button>
           <button className="nav-link" onClick={handleBecomeHost} type="button">

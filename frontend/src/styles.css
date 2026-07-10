@@ -278,6 +278,54 @@ select {
   width: 100%;
 }
 
+.mobile-menu-button {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #dbe2ec;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px;
+}
+
+.mobile-menu-button span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin: 5px 0;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+.nav-link,
+.profile-dropdown button,
+.primary-button,
+.secondary-button,
+.danger-button,
+.link-button,
+.text-reset,
+.text-button {
+  touch-action: manipulation;
+}
+
 .listing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -2683,5 +2731,638 @@ textarea {
   .button-row .primary-button,
   .button-row .secondary-button {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+
+  body {
+    background: #f8fafc;
+  }
+
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .brand {
+    min-width: 0;
+    font-size: 18px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .mobile-menu-button {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .mobile-menu-button[aria-expanded="true"] {
+    border-color: rgba(37, 99, 235, 0.45);
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .site-nav {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: calc(100% + 8px);
+    z-index: 40;
+    display: grid;
+    max-height: min(calc(100vh - 82px), 620px);
+    overflow-y: auto;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid #dbe2ec;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease;
+  }
+
+  .site-nav.mobile-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .nav-link,
+  .avatar-button {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-align: left;
+  }
+
+  .profile-menu {
+    width: 100%;
+  }
+
+  .avatar-button {
+    gap: 10px;
+  }
+
+  .profile-dropdown {
+    position: static;
+    min-width: 0;
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+
+  .profile-dropdown button {
+    min-height: 44px;
+  }
+
+  .page {
+    width: min(100% - 24px, 1450px);
+    padding: 20px 0 44px;
+  }
+
+  .page-heading,
+  .marketplace-heading,
+  .bookings-hero,
+  .pending-request-header,
+  .section-heading-row,
+  .booking-chat-header,
+  .reviews-panel-header,
+  .review-item > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-heading h1,
+  .detail-content h1,
+  .marketplace-heading h1,
+  .bookings-hero h1,
+  .hero-copy h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .page-heading h1,
+  .detail-content h1,
+  .marketplace-heading h1 {
+    font-size: clamp(28px, 10vw, 38px);
+  }
+
+  .bookings-hero h1 {
+    font-size: clamp(34px, 12vw, 44px);
+  }
+
+  .home-page {
+    gap: 22px;
+  }
+
+  .home-hero {
+    padding: 24px 18px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(42px, 15vw, 60px);
+  }
+
+  .hero-copy p:last-child {
+    font-size: 17px;
+  }
+
+  .home-section,
+  .how-it-works-panel,
+  .host-banner,
+  .seller-dashboard,
+  .seller-request-card,
+  .form-card,
+  .booking-panel,
+  .detail-content,
+  .listing-card-body,
+  .account-card,
+  .account-hero {
+    padding: 16px;
+  }
+
+  .category-card-grid,
+  .featured-grid,
+  .steps-grid,
+  .seller-stat-grid,
+  .booking-summary-grid,
+  .request-facts,
+  .facts,
+  .form-grid,
+  .listing-controls,
+  .account-grid,
+  .account-hero,
+  .marketplace-layout,
+  .detail-layout,
+  .manage-card,
+  .manage-content,
+  .seller-request-top,
+  .search-card {
+    grid-template-columns: 1fr;
+  }
+
+  .marketplace-layout,
+  .seller-request-list,
+  .booking-list,
+  .manage-page,
+  .seller-requests-page {
+    gap: 14px;
+  }
+
+  .filter-card {
+    position: static;
+  }
+
+  .filter-card-header,
+  .filter-group {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .listings-panel {
+    padding: 14px;
+  }
+
+  .listing-controls {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .marketplace-grid,
+  .listing-grid,
+  .list-view {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .marketplace-card .listing-image,
+  .listing-image,
+  .featured-card img,
+  .featured-image-placeholder {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .listing-image img,
+  .marketplace-card .listing-image img,
+  .booking-image img,
+  .seller-request-image img,
+  .detail-image img,
+  .featured-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .marketplace-card h2,
+  .featured-card-body h3,
+  .listing-title-row h2,
+  .booking-card h2,
+  .booking-panel h2,
+  .seller-request-card h2 {
+    overflow-wrap: anywhere;
+  }
+
+  .listing-meta-row,
+  .owner-row,
+  .booking-details-row,
+  .total-row,
+  .card-footer,
+  .chat-preview {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .owner-row em {
+    margin-left: 0;
+  }
+
+  .view-toggle {
+    width: 100%;
+  }
+
+  .view-toggle button {
+    flex: 1;
+    min-height: 44px;
+  }
+
+  .auth-page,
+  .account-empty {
+    min-height: calc(100vh - 120px);
+  }
+
+  .auth-card,
+  .auth-card.wide {
+    width: 100%;
+    padding: 22px;
+  }
+
+  .account-details div,
+  .account-stats div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .account-details dd {
+    max-width: 100%;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .seller-stat-card strong {
+    font-size: 24px;
+    overflow-wrap: anywhere;
+  }
+
+  .pending-request-item,
+  .request-actions,
+  .button-row,
+  .booking-card-side,
+  .bookings-page .booking-card-side {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button-row,
+  .request-actions {
+    gap: 10px;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .danger-button {
+    min-height: 46px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .link-button,
+  .text-button,
+  .text-reset {
+    min-height: 40px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  textarea {
+    line-height: 1.45;
+  }
+
+  .checkbox-row,
+  .filter-checkbox {
+    min-height: 42px;
+  }
+
+  .checkbox-row input,
+  .filter-checkbox input {
+    flex: 0 0 auto;
+  }
+
+  .image-preview-grid,
+  .detail-image-strip,
+  .damage-image-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .damage-image-list {
+    display: grid;
+  }
+
+  .damage-image-list a {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .bookings-page .booking-card {
+    padding: 14px;
+  }
+
+  .booking-image,
+  .seller-request-image {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .booking-main,
+  .booking-main > div,
+  .seller-request-card,
+  .request-facts div,
+  .refund-reason-box,
+  .review-item,
+  .chat-preview span {
+    min-width: 0;
+  }
+
+  .request-facts dd,
+  .refund-reason-box p,
+  .review-item p,
+  .booking-dates,
+  .meta,
+  .helper-text,
+  .chat-preview span,
+  .chat-bubble p {
+    overflow-wrap: anywhere;
+  }
+
+  .chat-preview {
+    gap: 10px;
+  }
+
+  .chat-preview span {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .chat-preview-meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .booking-chat {
+    max-height: calc(100vh - 120px);
+    padding: 14px;
+  }
+
+  .booking-chat-messages {
+    max-height: min(52vh, 430px);
+    padding: 10px;
+  }
+
+  .chat-bubble {
+    max-width: 92%;
+    overflow-wrap: anywhere;
+  }
+
+  .booking-chat-form {
+    position: sticky;
+    bottom: 0;
+    padding-top: 8px;
+    background: #ffffff;
+  }
+
+  .booking-chat-form textarea {
+    max-height: 140px;
+  }
+
+  .earnings-table {
+    gap: 12px;
+  }
+
+  .earnings-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .earnings-row-head {
+    display: none;
+  }
+
+  .earnings-row > span,
+  .earnings-row > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .earnings-row > span {
+    display: grid;
+    gap: 3px;
+  }
+
+  .earnings-row > span::before {
+    color: #657386;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .earnings-row > span:nth-child(1)::before {
+    content: "Listing";
+  }
+
+  .earnings-row > span:nth-child(2)::before {
+    content: "Renter";
+  }
+
+  .earnings-row > span:nth-child(3)::before {
+    content: "Dates";
+  }
+
+  .earnings-row > span:nth-child(4)::before {
+    content: "Total";
+  }
+
+  .earnings-row > span:nth-child(5)::before {
+    content: "Platform fee";
+  }
+
+  .earnings-row > span:nth-child(6)::before {
+    content: "Seller earnings";
+  }
+
+  .earnings-row > span:nth-child(7)::before {
+    content: "Status";
+  }
+
+  .earnings-row > span:nth-child(8)::before {
+    content: "Payout";
+  }
+
+  .earnings-row > span:nth-child(9)::before {
+    content: "Action";
+  }
+
+  .manage-card {
+    grid-template-columns: 1fr;
+  }
+
+  .manage-image {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .manage-content,
+  .manage-editor {
+    padding: 16px;
+  }
+
+  .manage-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .detail-image {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .booking-panel {
+    position: static;
+  }
+
+  .onboarding-page {
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .onboarding-brand-panel {
+    gap: 18px;
+  }
+
+  .onboarding-illustration {
+    min-height: 140px;
+  }
+
+  .onboarding-card {
+    padding: 20px;
+  }
+
+  .step-indicator {
+    gap: 8px;
+    margin-bottom: 28px;
+    font-size: 14px;
+  }
+
+  .react-international-phone-input-container .react-international-phone-country-selector-button {
+    height: 50px;
+  }
+
+  .react-international-phone-input-container .react-international-phone-input {
+    height: 50px;
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 430px) {
+  .page {
+    width: min(100% - 20px, 1450px);
+  }
+
+  .site-header {
+    padding-inline: 10px;
+  }
+
+  .site-nav {
+    left: 8px;
+    right: 8px;
+  }
+
+  .home-hero,
+  .home-section,
+  .how-it-works-panel,
+  .host-banner,
+  .seller-dashboard,
+  .seller-request-card,
+  .booking-chat,
+  .auth-card,
+  .account-card,
+  .account-hero,
+  .form-card,
+  .booking-panel,
+  .listings-panel {
+    border-radius: 16px;
+  }
+
+  .hero-object {
+    display: none;
+  }
+
+  .category-card {
+    min-height: 120px;
+  }
+
+  .marketplace-card .listing-card-body,
+  .featured-card-body {
+    padding: 14px;
+  }
+
+  .request-facts div,
+  .refund-reason-box,
+  .refund-request-form,
+  .reviews-panel {
+    padding: 12px;
+  }
+
+  .booking-status,
+  .badge {
+    white-space: normal;
+  }
+
+  .damage-image-list,
+  .image-preview-grid,
+  .detail-image-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (hover: none) {
+  .marketplace-card:hover,
+  .category-card:hover {
+    transform: none;
   }
 }

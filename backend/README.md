@@ -33,7 +33,7 @@ cp .env.example .env
 
 For production, set `NODE_ENV=production` and provide a strong `JWT_SECRET`. The API will fail fast on startup if `JWT_SECRET` is missing in production.
 
-Email verification links are generated from `FRONTEND_URL`; set it to the deployed frontend URL outside local development.
+Email verification links are generated from `FRONTEND_URL`; set it to the deployed frontend URL outside local development. CORS allows origins from `FRONTEND_URLS`, using a comma-separated list.
 
 Listing image uploads use Cloudinary. Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, and optionally `CLOUDINARY_FOLDER` in `.env`.
 
@@ -45,6 +45,7 @@ PORT=8080
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
 JWT_SECRET="use-a-long-random-production-secret"
 FRONTEND_URL="https://borrowa.com"
+FRONTEND_URLS="https://borrowa.my,https://borrowa-y1mj185zv-borrowa.vercel.app"
 SMTP_HOST="smtp.example.com"
 SMTP_PORT="587"
 SMTP_SECURE="false"

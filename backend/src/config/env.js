@@ -9,11 +9,26 @@ if (isProduction && !process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is required when NODE_ENV=production.");
 }
 
+function normalizeOrigin(value) {
+  return value ? value.trim().replace(/\/$/, "") : "";
+}
+
+function parseFrontendOrigins() {
+  const fallbackFrontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const configuredOrigins = process.env.FRONTEND_URLS || fallbackFrontendUrl;
+
+  return configuredOrigins
+    .split(",")
+    .map(normalizeOrigin)
+    .filter(Boolean);
+}
+
 const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: process.env.PORT || 4000,
   databaseUrl: process.env.DATABASE_URL,
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+  frontendUrls: parseFrontendOrigins(),
   jwtSecret: process.env.JWT_SECRET || fallbackJwtSecret,
   smtp: {
     host: process.env.SMTP_HOST,
